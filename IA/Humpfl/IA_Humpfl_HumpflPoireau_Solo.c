@@ -10,7 +10,7 @@ global CAT_DEF = "def";
 global CAT_BUF = "buf";
 global CAT_VIE = "vie";
 global CAT_DEBUF = "debuf";
-
+global testgit;
 //}
 //{
 //##############################################################
