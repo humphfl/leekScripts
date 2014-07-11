@@ -1,6 +1,6 @@
-//##############################################################
-//#                         GLOBALS                            #
-//##############################################################
+//##################################################################################################################
+//#                                                   GLOBALS                                                      #
+//##################################################################################################################
 global turn = 0;
 global myWeapons = getWeapon();
 global myChips = getChips();
@@ -34,9 +34,9 @@ global C_IMPORTANCE_FORCE = 3;//Coefficient représentant l'importange de la for
 global C_IMPORTANCE_AGILITY = 1;//Coefficient représentant l'importange de l'agilitépour le calcul de puissance/comparaison
 
 
-//##############################################################
-//#                         DATA TYPE                          #
-//##############################################################
+//##################################################################################################################
+//#                                                   DATA TYPE                                                    #
+//##################################################################################################################
 
 /**
  * renvoie l'élément qui a pour clé key
@@ -71,9 +71,9 @@ function setItem(key, value, dict) {
 	push(dict, [key, value]);
 }
 
-//##############################################################
-//#                         FUNCTIONS                          #
-//##############################################################
+//##################################################################################################################
+//#                                                   FUNCTIONS                                                    #
+//##################################################################################################################
 
 /**
  * globals for function myGetWeaponEffects
@@ -426,34 +426,51 @@ function doAction(action, cible, item){
  * cible : cible (un poireau, une cell)
  * item : un item à utiliser (une chip, une arme)
  * number : un nombre (pour les déplacements)
+ * @return : [result, statBefore, statAfter]
  */
 function doAction(action, cible, item, number){
 	if(action==ACTION_MOVEAWAY){
-		return moveAwayFromCell(cible, number);//Lv 19 => niv 5 : moveAwayFrom(leek, mp)
+		var cellStart = getCell();
+		var result = moveAwayFromCell(cible, number);//Lv 19 => niv 5 : moveAwayFrom(leek, mp)
+		var cellEnd = getCell();
+		return[result, cellStart, cellEnd];
 	}
 	if(action==ACTION_MOVETOWARD){
-		return moveTowardCell(cible, number);
+		var cellStart = getCell();
+		var result = moveTowardCell(cible, number);
+		var cellEnd = getCell();
+		return[result, cellStart, cellEnd];
 	}
 	if(action==ACTION_EQUIP_WEAPON){
 		setWeapon(item);
 		if(getWeapon()==-1){
 			setWeapon(myWeapons[0]);
-			return -1;
 		}
-		return 1;
+		return [getWeapon()];
 	}
 	if(action==ACTION_USE_WEAPON){
 		if(getWeapon()==-1){
 			setWeapon(myWeapons[0]);
 		}
-		return useWeapon(cible);
+		var lifeBefore = getLife(cible);
+		var result = useWeapon(cible);
+		var lifeAfter = getLife(cible);
+		return [result, lifeBefore, lifeAfter];
 	}
 	if(action==ACITON_USE_CHIP){
 		if(getItem(item, mychipsCd)!=null){
-			return useChip(item, cible);
+			var cat = myGetChipEffects(item)[CHIPEF_CAT];
+			if(cat == CAT_ATK || cat == CAT_VIE){
+				var lifeBefore = getLife(cible);
+				var result = useChip(item, cible);
+				var lifeAfter = getLife(cible);
+				return [result, lifeBefore, lifeAfter];
+
+			}
+			return [useChip(item, cible)];
 		}
-		return -1;
 	}
+	return null;
 }
 
 /**
@@ -477,8 +494,8 @@ function estimateDamage(item){
 		return [effects[WEAPONEF_DAMAGE_MIN]*(1+force/100),effects[WEAPONEF_DAMAGE_MAX]*(1+force/100)];
 	}
 	return 0;
-
 }
+
 /**
  * [initTurn description]
  * fonction d'initialisation du tour
@@ -511,14 +528,15 @@ function initGame() {
 	}
 }
 
-//##############################################################
-//#                            MAIN                            #
-//##############################################################
+//##################################################################################################################
+//#                                                      MAIN                                                      #
+//##################################################################################################################
 initTurn();
 if(turn==1){initGame();}
 
 debug("##############################");
 
-if(myGetWeaponEffects(getWeapon())[6/*Inline*/]==RANGE_INLINE){//Niv 7 : conditionner le comportement si l'autre a une arme inline (rester à 5 de distance)
+if(myGetWeaponEffects(getWeapon())[6/*Inline*/]==RANGE_INLINE){//Niv 7 : conditionner le comportement si l'autre
+																// a une arme inline (rester à 5 de distance)
 
 }
