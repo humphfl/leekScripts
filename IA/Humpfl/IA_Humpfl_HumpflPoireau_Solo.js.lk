@@ -1,24 +1,46 @@
-//{
 //##############################################################
 //#                         GLOBALS                            #
 //##############################################################
 global turn = 0;
+global myWeapons = getWeapon();
 global myChips = getChips();
 global mychipsCd = [];
-global CAT_ATK = "atk";
-global CAT_DEF = "def";
-global CAT_BUF = "buf";
-global CAT_VIE = "vie";
-global CAT_DEBUF = "debuf";
-global testgit;
-//}
-//{
+global curentEnemy;
+global enemies = getEnemies();//Niv 16
+global me = getLeek();
+global allies = getAliveAllies();//Niv 14
+
+global CAT_ATK = "CAT_ATK";
+global CAT_DEF = "CAT_DEF";
+global CAT_BUF = "CAT_BUF";
+global CAT_VIE = "CAT_VIE";
+global CAT_DEBUF = "CAT_DEBUF";
+
+global RANGE_NORMAL = "RANGE_NORMAL";
+global RANGE_INLINE = "RANGE_INLINE";
+
+global SPECIAL_DAMAGE_SUP = "SPECIAL_DAMAGE_SUP";
+global SPECIAL_DAMAGE_OVER_TIME = "SPECIAL_DAMAGE_OVER_TIME";
+
+global ACTION_USE_WEAPON = "ACTION_USE_WEAPON";
+global ACTION_EQUIP_WEAPON = "ACTION_EQUIP_WEAPON";
+global ACTION_USE_CHIP = "ACITON_USE_CHIP";
+global ACTION_MOVETOWARD = "ACTION_MOVETOWARD";
+global ACTION_MOVEAWAY = "ACTION_MOVEAWAY";
+
+global BAD_ACTION_TYPE = "BAD_ACTION_TYPE";
+
+global C_IMPORTANCE_FORCE = 3;//Coefficient repr√©sentant l'importange de la force pour le calcul de puissance/comparaison
+global C_IMPORTANCE_AGILITY = 1;//Coefficient repr√©sentant l'importange de l'agilit√©pour le calcul de puissance/comparaison
+
+
 //##############################################################
 //#                         DATA TYPE                          #
 //##############################################################
+
 /**
- * renvoie l'ÈlÈment qui a pour clÈ key
- **/
+ * renvoie l'√©l√©ment qui a pour cl√© key
+ */
 function getItem(key, dict) {
 	for (var item in dict) {
 		if (inArray(item, key)) {
@@ -29,8 +51,8 @@ function getItem(key, dict) {
 }
 
 /**
- * supprime l'ÈlÈment qui a la clÈ key
- **/
+ * supprime l'√©l√©ment qui a la cl√© key
+ */
 function deleteItem(key, dict) {
 	for (var i = 0; i < count(dict); i++) {
 		if (inArray(dict[i], key)) {
@@ -42,54 +64,121 @@ function deleteItem(key, dict) {
 }
 
 /**
- * ajoute un ÈlÈment qui a pour clÈ key et valeur value
- **/
+ * ajoute un √©l√©ment qui a pour cl√© key et valeur value
+ */
 function setItem(key, value, dict) {
 	deleteItem(key, dict);
 	push(dict, [key, value]);
 }
 
-//}
-//{
 //##############################################################
 //#                         FUNCTIONS                          #
 //##############################################################
+
 /**
-* renvoie les effets d'uner arme :
-* [min_range, max_range, min_damage, max_damage, shotSCost, isEquiped, rangeType, specialEffects]
-* 0 : portÈe min
-* 1 : portÈe max
-* 2 : dÈgats min
-* 3 : dÈgats max
-* 4 : cout du tir
-* 5 : arme ÈquipÈe ? 
-* 6 : portÈe normale ou en ligne
-* 7 : autres effets
-**/
+ * globals for function myGetWeaponEffects
+ */
+global WEAPONEF_RANGE_MIN =0;
+global WEAPONEF_RANGE_MAX = 1;
+global WEAPONEF_DAMAGE_MIN = 2;
+global WEAPONEF_DAMAGE_MAX = 3;
+global WEAPONEF_COST = 3;
+global WEAPONEF_ISEQUIPED = 4;
+global WEAPONEF_RANGETYPE = 5;
+global WEAPONEF_FAILRATE = 6;
+global WEAPONEF_OTHER_EFFECTS = 7;
+/**
+ * [myGetWeaponEffects description]
+ * renvoie les effets d'uner arme :
+ * [min_range, max_range, min_damage, max_damage, shotSCost, isEquiped, rangeType, failRate, specialEffects]
+ * 0 : port√©e min
+ * 1 : port√©e max
+ * 2 : d√©gats min
+ * 3 : d√©gats max
+ * 4 : cout du tir
+ * 5 : arme √©quip√©e ? 
+ * 6 : port√©e normale ou en ligne
+ * 7 : taux d'√©chec
+ * 8 : autres effet
+ * @param  {[type]} weapon [description]
+ * @return {[type]}        [description]
+ */
 function myGetWeaponEffects(weapon){
 	if(weapon==WEAPON_PISTOL){
 		var isEquiped = false;
 		if(getWeapon()==weapon){isEquiped=true;}
 		return[/*min_range*/0, /*max_range*/7, /*min_damage*/15, /*max_damage*/20,
-			   /*shotCost*/3, /*isEquiped*/isEquiped, /*rangeType*/RANGE_NORMAL, 
+			   /*shotCost*/3, /*isEquiped*/isEquiped, /*rangeType*/RANGE_NORMAL, /*failRate*/0.05,
+			   /*special*/[]];
+	}
+	if(weapon==WEAPON_MACHINE_GUN){
+		var isEquiped = false;
+		if(getWeapon()==weapon){isEquiped=true;}
+		return[/*min_range*/1, /*max_range*/6, /*min_damage*/20, /*max_damage*/24,
+			   /*shotCost*/4, /*isEquiped*/isEquiped, /*rangeType*/RANGE_INLINE, /*failRate*/0.07,
+			   /*special*/[]];
+	}
+	if(weapon==WEAPON_DOUBLE_GUN){
+		var isEquiped = false;
+		if(getWeapon()==weapon){isEquiped=true;}
+		return[/*min_range*/2, /*max_range*/7, /*min_damage*/18, /*max_damage*/25,
+			   /*shotCost*/4, /*isEquiped*/isEquiped, /*rangeType*/RANGE_NORMAL, /*failRate*/0.06,
+			   /*special*/[[SPECIAL_DAMAGE_SUP, /*min_damage*/5, /*max_damage*/8]
+			   			  ]
+			  ];
+	}
+	if(weapon==WEAPON_SHOTGUN){
+		var isEquiped = false;
+		if(getWeapon()==weapon){isEquiped=true;
+		return[/*min_range*/1, /*max_range*/5, /*min_damage*/33, /*max_damage*/43,/*failRate*/0.10,
+			   /*shotCost*/5, /*isEquiped*/isEquiped, /*rangeType*/RANGE_INLINE, 
+			   /*special*/[]];
+	}
+	if(weapon==WEAPON_MAGNUM){
+		var isEquiped = false;
+		if(getWeapon()==weapon){isEquiped=true;}
+		return[/*min_range*/1, /*max_range*/8, /*min_damage*/25, /*max_damage*/40,/*failRate*/0.04,
+			   /*shotCost*/5, /*isEquiped*/isEquiped, /*rangeType*/RANGE_NORMAL, 
+			   /*special*/[]];
+	}
+	if(weapon==WEAPON_LASER){
+		var isEquiped = false;
+		if(getWeapon()==weapon){isEquiped=true;}
+		return[/*min_range*/2, /*max_range*/7, /*min_damage*/43, /*max_damage*/59,/*failRate*/0.09,
+			   /*shotCost*/6, /*isEquiped*/isEquiped, /*rangeType*/RANGE_INLINE, 
 			   /*special*/[]];
 	}
 }
+
+/**
+ * globals for myGetChipEffects
+ */
+global CHIPEF_ACTUALCD = 0;
+global CHIPEF_TOTALCD = 1;
+global CHIPEF_RANGE_MIN = 2;
+global CHIPEF_RANGE_MAX = 3;
+global CHIPEF_CAT = 4;
+global CHIPEF_STAT_MIN = 5;
+global CHIPEF_STAT_MAX = 6;
+global CHIPEF_FAILRATE = 7;
+global CHIPEF_COST = 8;
+global CHIPEF_RANGETYPE = 9;
+global CHIPEF_OTHER_EFFECTS = 10;
 /**
  * renvoie les effets d'une chip :
  * [Curent_cd, max_cd, min_range, max_range, cat, minDamage/heal/bouclier, maxDamage/bouclier/heal, fail_rate, cost]
  * 0 : cooldown actuel
  * 1 : cooldown total
- * 2 : portÈe minimum
- * 3 : portÈe maximum
- * 4 : catÈgorie
- * 5 : plage de dÈgats/heal/bouclier minimum
- * 6 : plage de dÈgats/heal/bouclier maximum
- * 7 : taux d'Èchec
+ * 2 : port√©e minimum
+ * 3 : port√©e maximum
+ * 4 : cat√©gorie
+ * 5 : plage de d√©gats/heal/bouclier minimum
+ * 6 : plage de d√©gats/heal/bouclier maximum
+ * 7 : taux d'√©chec
  * 8 : cout en PT
- * 9 : portÈe normale ou en ligne (‡ ajouter)
- * 10: autre effets (‡ ajouter)
- **/
+ * 9 : port√©e normale ou en ligne (√† ajouter)
+ * 10: autre effets (√† ajouter)
+ */
 function myGetChipEffects(chip) {
 	if (chip == CHIP_BANDAGE) {
 		return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/1, /*minRange*/0, 
@@ -116,7 +205,6 @@ function myGetChipEffects(chip) {
 				/*maxRange*/3,/*cat*/CAT_VIE ,/*min*/200,/*max*/ 200, 
 				/*fail*/0.25,/*cost*/ 8];
 	} //ressusiter
-	
 	if (chip == CHIP_STRETCHING) {
 	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/3, /*minRange*/0, 
 				/*maxRange*/5,/*cat*/CAT_BUF ,/*min*/50,/*max*/ 50, 
@@ -177,11 +265,11 @@ function myGetChipEffects(chip) {
 				/*maxRange*/3,/*cat*/CAT_BUF ,/*min*/2,/*max*/ 4, 
 				/*fail*/0.12,/*cost*/ 7];
 	} //+PT
-	
 	if (chip == CHIP_LIBERATION) {
-		return CAT_DEBUF;
+		return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/5, /*minRange*/0, 
+				/*maxRange*/6,/*cat*/CAT_DEBUF ,/*min*/0,/*max*/ 0, 
+				/*fail*/0.07,/*cost*/ 5];
 	}
-	
 	if (chip == CHIP_HELMET) {
 		return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/4, /*minRange*/0, 
 				/*maxRange*/4,/*cat*/CAT_DEF ,/*min*/15,/*max*/ 15, 
@@ -212,55 +300,46 @@ function myGetChipEffects(chip) {
 				/*maxRange*/3,/*cat*/CAT_DEF ,/*min*/0.40,/*max*/ 0.40, 
 				/*fail*/0.06,/*cost*/ 8]; //+rel
 	}
-	
 	if (chip == CHIP_SHOCK) {
 	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/0, /*minRange*/0, 
 				/*maxRange*/6,/*cat*/CAT_ATK ,/*min*/5,/*max*/ 7, 
 				/*fail*/0.30,/*cost*/ 2];
 	} //zone
-	}
 	if (chip == CHIP_PEBBLE) {
 	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/1, /*minRange*/0, 
 				/*maxRange*/5,/*cat*/CAT_ATK ,/*min*/2,/*max*/ 17, 
 				/*fail*/0.09,/*cost*/ 2];
 	} //zone
-	}
 	if (chip == CHIP_SPARK) {
 	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/3, /*minRange*/0, 
 				/*maxRange*/10,/*cat*/CAT_ATK ,/*min*/8,/*max*/ 16, 
 				/*fail*/0.04,/*cost*/ 3];
-	} //zone
 	} //passe au travers des obstacles
 	if (chip == CHIP_ICE) {
 	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/0, /*minRange*/0, 
 				/*maxRange*/8,/*cat*/CAT_ATK ,/*min*/17,/*max*/ 19, 
 				/*fail*/0.05,/*cost*/ 4];
 	} //zone
-	}
 	if (chip == CHIP_ROCK) {
 	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/1, /*minRange*/2, 
 				/*maxRange*/6,/*cat*/CAT_ATK ,/*min*/30,/*max*/ 31, 
 				/*fail*/0.08,/*cost*/ 5];
 	} //zone
-	}
 	if (chip == CHIP_FLASH) {
 	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/1, /*minRange*/1, 
 				/*maxRange*/7,/*cat*/CAT_ATK ,/*min*/19,/*max*/ 24, 
 				/*fail*/0.01,/*cost*/ 4];
-	} //zone
 	} //zone
 	if (chip == CHIP_FLAME) {
 	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/0, /*minRange*/2, 
 				/*maxRange*/7,/*cat*/CAT_ATK ,/*min*/25,/*max*/ 27, 
 				/*fail*/0.10,/*cost*/ 4];
 	} //zone
-	}
 	if (chip == CHIP_STALACTITE) {
 	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/3, /*minRange*/2, 
 				/*maxRange*/7,/*cat*/CAT_ATK ,/*min*/64,/*max*/ 67, 
 				/*fail*/0.20,/*cost*/ 6];
 	} //zone
-	}
 	if (chip == CHIP_LIGHTNING) {
 	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/0, /*minRange*/2, 
 				/*maxRange*/6,/*cat*/CAT_ATK ,/*min*/35,/*max*/ 47, 
@@ -282,13 +361,133 @@ function myGetChipEffects(chip) {
 				/*fail*/0.04,/*cost*/ 8];
 	} //zone
 }
+
 /**
-* fonction d'initialisation du tour
-**/
+ * [whatIsYourPowerLevel description]
+ * calcul la puissance d'un poireau
+ * @param  {[type]} leek [description]
+ * @return {[type]}      [description]
+ */
+function whatIsYourPowerLevel(leek){
+	if(leek==null){
+		return 0;
+	}
+	return [/*force*/getLife(leek)*(1+getForce(leek)/100), 
+			/*heal-def*/getLife(leek)*(1+getAgility(leek)/100)];//estimation de la fore √† affiner
+	//En fonction des chips et armes par exemple
+}
+
+/**
+ * [compareleeks description]
+ * compare la puissance de 2 poirreau, renvoie le plus fort.
+ * @param  {[type]} leek1 [description]
+ * @param  {[type]} leek2 [description]
+ * @return {[type]}       [description]
+ */
+function compareleeks(leek1, leek2){
+	var pow1 = whatIsYourPowerLevel(leek1);
+	var pow2 = whatIsYourPowerLevel(leek2);
+	if(C_IMPORTANCE_FORCE*pow1[0]+C_IMPORTANCE_AGILITY*pow1[1] > C_IMPORTANCE_FORCE*pow2[0]+C_IMPORTANCE_AGILITY*pow2[1]){
+		return leek1;
+	}
+	return leek2;
+}
+
+/**
+ * [doAction description]
+ * @param  {[type]} action [description]
+ * @param  {[type]} cible  [description]
+ * @return {[type]}        [description]
+ */
+function doAction(action, cible){
+	if(action==ACTION_USE_WEAPON){
+		return doAction(action, cible, null, 0);
+	}
+	return BAD_ACTION_TYPE;
+}
+
+/**
+ * [doAction description]
+ * @param  {[type]} action [description]
+ * @param  {[type]} cible  [description]
+ * @param  {[type]} item   [description]
+ * @return {[type]}        [description]
+ */
+function doAction(action, cible, item){
+	if(action!=ACTION_MOVEAWAY&&action!=ACTION_MOVETOWARD){
+		return doAction(action, cible, item, 0);
+	}
+	return BAD_ACTION_TYPE;
+}
+
+/**
+ * fonction g√©n√©rique pour faire tout type d'action.
+ * action : action √† faire (dans la liste des globales)
+ * cible : cible (un poireau, une cell)
+ * item : un item √† utiliser (une chip, une arme)
+ * number : un nombre (pour les d√©placements)
+ */
+function doAction(action, cible, item, number){
+	if(action==ACTION_MOVEAWAY){
+		return moveAwayFromCell(cible, number);//Lv 19 => niv 5 : moveAwayFrom(leek, mp)
+	}
+	if(action==ACTION_MOVETOWARD){
+		return moveTowardCell(cible, number);
+	}
+	if(action==ACTION_EQUIP_WEAPON){
+		setWeapon(item);
+		if(getWeapon()==-1){
+			setWeapon(myWeapons[0]);
+			return -1;
+		}
+		return 1;
+	}
+	if(action==ACTION_USE_WEAPON){
+		if(getWeapon()==-1){
+			setWeapon(myWeapons[0]);
+		}
+		return useWeapon(cible);
+	}
+	if(action==ACITON_USE_CHIP){
+		if(getItem(item, mychipsCd)!=null){
+			return useChip(item, cible);
+		}
+		return -1;
+	}
+}
+
+/**
+ * 
+ * estime les d√©gats qu'une chip ou une arme entr√©e en param√®tre peut infliger
+ * @param  {[type]} item [description]
+ * @return {[type]}      [description]
+ */
+function estimateDamage(item){
+
+	if(getItem(item, mychipsCd)!=null){
+		var effects = myGetChipEffects(item);
+		if(effects[CHIPEF_CAT]==CAT_ATK){
+			var force = getForce();
+			return [effects[CHIPEF_STAT_MIN]*(1+force/100),effects[CHIPEF_STAT_MAX]*(1+force/100)];
+		}
+	}
+	if(item==getWeapon()){
+		var effects = myGetWeaponEffects(item);
+		force = getForce();
+		return [effects[WEAPONEF_DAMAGE_MIN]*(1+force/100),effects[WEAPONEF_DAMAGE_MAX]*(1+force/100)];
+	}
+	return 0;
+
+}
+/**
+ * [initTurn description]
+ * fonction d'initialisation du tour
+ * @return {[type]} [description]
+ */
 function initTurn() {
-	//Mise ‡ jour du tour
+	//Mise √† jour du tour
 	turn++;
-	//Mise ‡ jour des cooldowns
+	//Mise √† jour des cooldowns
 	var value = 0;
 	for(var chip in myChips){
 		value = max(0, getItem(chip, mychipsCd)-1);
@@ -297,22 +496,29 @@ function initTurn() {
 }
 
 /**
-* fonction d'initialisation de la partie
-**/
+ * [initGame description]
+ * fonction d'initialisation de la partie
+ * @return {[type]} [description]
+ */
 function initGame() {
+	//initialisation des chips
 	for(var chip in myChips){
 		setItem(chip, 0, mychipsCd);
 	}
-
+	//initialisation de l'ennemie courant
+	for(var enn in enemies){
+		curentEnemy = compareleeks(curentEnemy, enn);
+	}
 }
 
-//}
-//{
 //##############################################################
 //#                            MAIN                            #
 //##############################################################
 initTurn();
-if(turn=1){initGame();}
+if(turn==1){initGame();}
+
 debug("##############################");
 
-//}
+if(myGetWeaponEffects(getWeapon())[6/*Inline*/]==RANGE_INLINE){//Niv 7 : conditionner le comportement si l'autre a une arme inline (rester √† 5 de distance)
+
+}
