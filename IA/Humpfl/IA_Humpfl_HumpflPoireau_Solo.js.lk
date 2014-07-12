@@ -4,12 +4,11 @@
 global turn = 0;
 global myWeapons = getWeapon();
 global myChips = getChips();
-global mychipsCd = [];
+global myChipsCd = [];
 global curentEnemy;
-global enemies = getEnemies();//Niv 16
+global enemies = getEnemies(); //Niv 16
 global me = getLeek();
-global allies = getAliveAllies();//Niv 14
-
+global allies = getAliveAllies(); //Niv 14
 global CAT_ATK = "CAT_ATK";
 global CAT_DEF = "CAT_DEF";
 global CAT_BUF = "CAT_BUF";
@@ -30,14 +29,13 @@ global ACTION_MOVEAWAY = "ACTION_MOVEAWAY";
 
 global BAD_ACTION_TYPE = "BAD_ACTION_TYPE";
 
-global C_IMPORTANCE_FORCE = 3;//Coefficient représentant l'importange de la force pour le calcul de puissance/comparaison
-global C_IMPORTANCE_AGILITY = 1;//Coefficient représentant l'importange de l'agilitépour le calcul de puissance/comparaison
+global C_IMPORTANCE_FORCE = 3; //Coefficient représentant l'importange de la force pour le calcul de puissance/comparaison
+global C_IMPORTANCE_AGILITY = 1; //Coefficient représentant l'importange de l'agilitépour le calcul de puissance/comparaison
 
 
 //##################################################################################################################
 //#                                                   DATA TYPE                                                    #
 //##################################################################################################################
-
 /**
  * renvoie l'élément qui a pour clé key
  */
@@ -68,17 +66,17 @@ function deleteItem(key, dict) {
  */
 function setItem(key, value, dict) {
 	deleteItem(key, dict);
+	debug("item = "+getChipName(key)+" value = "+value);
 	push(dict, [key, value]);
 }
 
 //##################################################################################################################
 //#                                                   FUNCTIONS                                                    #
 //##################################################################################################################
-
 /**
  * globals for function myGetWeaponEffects
  */
-global WEAPONEF_RANGE_MIN =0;
+global WEAPONEF_RANGE_MIN = 0;
 global WEAPONEF_RANGE_MAX = 1;
 global WEAPONEF_DAMAGE_MIN = 2;
 global WEAPONEF_DAMAGE_MAX = 3;
@@ -90,7 +88,7 @@ global WEAPONEF_OTHER_EFFECTS = 7;
 /**
  * [myGetWeaponEffects description]
  * renvoie les effets d'uner arme :
- * [min_range, max_range, min_damage, max_damage, shotSCost, isEquiped, rangeType, failRate, specialEffects]
+ * [min_range, max_range, min_damage, max_damage, shotSCost, weaponIsEquiped, rangeType, failRate, specialEffects]
  * 0 : portée min
  * 1 : portée max
  * 2 : dégats min
@@ -103,50 +101,74 @@ global WEAPONEF_OTHER_EFFECTS = 7;
  * @param  {[type]} weapon [description]
  * @return {[type]}        [description]
  */
-function myGetWeaponEffects(weapon){
-	if(weapon==WEAPON_PISTOL){
-		var isEquiped = false;
-		if(getWeapon()==weapon){isEquiped=true;}
-		return[/*min_range*/0, /*max_range*/7, /*min_damage*/15, /*max_damage*/20,
-			   /*shotCost*/3, /*isEquiped*/isEquiped, /*rangeType*/RANGE_NORMAL, /*failRate*/0.05,
-			   /*special*/[]];
+function myGetWeaponEffects(weapon) {
+	if (weapon == WEAPON_PISTOL) {
+		var weaponIsEquiped = false;
+		if (getWeapon() == weapon) {
+			weaponIsEquiped = true;
+		}
+		return [ /*min_range*/ 0, /*max_range*/ 7, /*min_damage*/ 15, /*max_damage*/ 20,
+		/*shotCost*/
+		3, /*weaponIsEquiped*/ weaponIsEquiped, /*rangeType*/ RANGE_NORMAL, /*failRate*/ 0.05,
+		/*special*/
+		[]];
 	}
-	if(weapon==WEAPON_MACHINE_GUN){
-		var isEquiped = false;
-		if(getWeapon()==weapon){isEquiped=true;}
-		return[/*min_range*/1, /*max_range*/6, /*min_damage*/20, /*max_damage*/24,
-			   /*shotCost*/4, /*isEquiped*/isEquiped, /*rangeType*/RANGE_INLINE, /*failRate*/0.07,
-			   /*special*/[]];
+	if (weapon == WEAPON_MACHINE_GUN) {
+		var weaponIsEquiped = false;
+		if (getWeapon() == weapon) {
+			weaponIsEquiped = true;
+		}
+		return [ /*min_range*/ 1, /*max_range*/ 6, /*min_damage*/ 20, /*max_damage*/ 24,
+		/*shotCost*/
+		4, /*weaponIsEquiped*/ weaponIsEquiped, /*rangeType*/ RANGE_INLINE, /*failRate*/ 0.07,
+		/*special*/
+		[]];
 	}
-	if(weapon==WEAPON_DOUBLE_GUN){
-		var isEquiped = false;
-		if(getWeapon()==weapon){isEquiped=true;}
-		return[/*min_range*/2, /*max_range*/7, /*min_damage*/18, /*max_damage*/25,
-			   /*shotCost*/4, /*isEquiped*/isEquiped, /*rangeType*/RANGE_NORMAL, /*failRate*/0.06,
-			   /*special*/[[SPECIAL_DAMAGE_SUP, /*min_damage*/5, /*max_damage*/8]
-			   			  ]
-			  ];
+	if (weapon == WEAPON_DOUBLE_GUN) {
+		var weaponIsEquiped = false;
+		if (getWeapon() == weapon) {
+			weaponIsEquiped = true;
+		}
+		return [ /*min_range*/ 2, /*max_range*/ 7, /*min_damage*/ 18, /*max_damage*/ 25,
+		/*shotCost*/
+		4, /*weaponIsEquiped*/ weaponIsEquiped, /*rangeType*/ RANGE_NORMAL, /*failRate*/ 0.06,
+		/*special*/
+		[
+			[SPECIAL_DAMAGE_SUP, /*min_damage*/ 5, /*max_damage*/ 8]
+		]];
 	}
-	if(weapon==WEAPON_SHOTGUN){
-		var isEquiped = false;
-		if(getWeapon()==weapon){isEquiped=true;
-		return[/*min_range*/1, /*max_range*/5, /*min_damage*/33, /*max_damage*/43,/*failRate*/0.10,
-			   /*shotCost*/5, /*isEquiped*/isEquiped, /*rangeType*/RANGE_INLINE, 
-			   /*special*/[]];
+	if (weapon == WEAPON_SHOTGUN) {
+		var weaponIsEquiped = false;
+		if (getWeapon() == weapon) {
+			weaponIsEquiped = true;
+		}
+		return [ /*min_range*/ 1, /*max_range*/ 5, /*min_damage*/ 33, /*max_damage*/ 43, /*failRate*/ 0.10,
+		/*shotCost*/
+		5, /*weaponIsEquiped*/ weaponIsEquiped, /*rangeType*/ RANGE_INLINE,
+		/*special*/
+		[]];
 	}
-	if(weapon==WEAPON_MAGNUM){
-		var isEquiped = false;
-		if(getWeapon()==weapon){isEquiped=true;}
-		return[/*min_range*/1, /*max_range*/8, /*min_damage*/25, /*max_damage*/40,/*failRate*/0.04,
-			   /*shotCost*/5, /*isEquiped*/isEquiped, /*rangeType*/RANGE_NORMAL, 
-			   /*special*/[]];
+	if (weapon == WEAPON_MAGNUM) {
+		var weaponIsEquiped = false;
+		if (getWeapon() == weapon) {
+			weaponIsEquiped = true;
+		}
+		return [ /*min_range*/ 1, /*max_range*/ 8, /*min_damage*/ 25, /*max_damage*/ 40, /*failRate*/ 0.04,
+		/*shotCost*/
+		5, /*weaponIsEquiped*/ weaponIsEquiped, /*rangeType*/ RANGE_NORMAL,
+		/*special*/
+		[]];
 	}
-	if(weapon==WEAPON_LASER){
-		var isEquiped = false;
-		if(getWeapon()==weapon){isEquiped=true;}
-		return[/*min_range*/2, /*max_range*/7, /*min_damage*/43, /*max_damage*/59,/*failRate*/0.09,
-			   /*shotCost*/6, /*isEquiped*/isEquiped, /*rangeType*/RANGE_INLINE, 
-			   /*special*/[]];
+	if (weapon == WEAPON_LASER) {
+		var weaponIsEquiped = false;
+		if (getWeapon() == weapon) {
+			weaponIsEquiped = true;
+		}
+		return [ /*min_range*/ 2, /*max_range*/ 7, /*min_damage*/ 43, /*max_damage*/ 59, /*failRate*/ 0.09,
+		/*shotCost*/
+		6, /*weaponIsEquiped*/ weaponIsEquiped, /*rangeType*/ RANGE_INLINE,
+		/*special*/
+		[]];
 	}
 }
 
@@ -158,12 +180,12 @@ global CHIPEF_TOTALCD = 1;
 global CHIPEF_RANGE_MIN = 2;
 global CHIPEF_RANGE_MAX = 3;
 global CHIPEF_CAT = 4;
-global CHIPEF_STAT_MIN = 5;
-global CHIPEF_STAT_MAX = 6;
-global CHIPEF_FAILRATE = 7;
+global CHIPEF_STAT_MIN = 5;;
 global CHIPEF_COST = 8;
 global CHIPEF_RANGETYPE = 9;
 global CHIPEF_OTHER_EFFECTS = 10;
+global CHIPEF_STAT_MAX = 6;
+global CHIPEF_FAILRATE = 7;
 /**
  * renvoie les effets d'une chip :
  * [Curent_cd, max_cd, min_range, max_range, cat, minDamage/heal/bouclier, maxDamage/bouclier/heal, fail_rate, cost]
@@ -181,184 +203,256 @@ global CHIPEF_OTHER_EFFECTS = 10;
  */
 function myGetChipEffects(chip) {
 	if (chip == CHIP_BANDAGE) {
-		return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/1, /*minRange*/0, 
-				/*maxRange*/6,/*cat*/CAT_VIE ,/*min*/10,/*max*/ 15, 
-				/*fail*/0.05,/*cost*/ 2];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 1, /*minRange*/ 0,
+		/*maxRange*/
+		6, /*cat*/ CAT_VIE, /*min*/ 10, /*max*/ 15,
+		/*fail*/
+		0.05, /*cost*/ 2];
 	}
 	if (chip == CHIP_CURE) {
-		return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/2, /*minRange*/0, 
-				/*maxRange*/5,/*cat*/CAT_VIE ,/*min*/35,/*max*/ 53, 
-				/*fail*/0.08,/*cost*/ 4];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 2, /*minRange*/ 0,
+		/*maxRange*/
+		5, /*cat*/ CAT_VIE, /*min*/ 35, /*max*/ 53,
+		/*fail*/
+		0.08, /*cost*/ 4];
 	}
 	if (chip == CHIP_DRIP) {
-		return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/3, /*minRange*/2, 
-				/*maxRange*/6,/*cat*/CAT_VIE ,/*min*/35,/*max*/ 40, 
-				/*fail*/0.07,/*cost*/ 5];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 3, /*minRange*/ 2,
+		/*maxRange*/
+		6, /*cat*/ CAT_VIE, /*min*/ 35, /*max*/ 40,
+		/*fail*/
+		0.07, /*cost*/ 5];
 	} //zone
 	if (chip == CHIP_VACCINE) {
-		return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/3, /*minRange*/0, 
-				/*maxRange*/6,/*cat*/CAT_VIE ,/*min*/30,/*max*/ 32, 
-				/*fail*/0.07,/*cost*/ 6];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 3, /*minRange*/ 0,
+		/*maxRange*/
+		6, /*cat*/ CAT_VIE, /*min*/ 30, /*max*/ 32,
+		/*fail*/
+		0.07, /*cost*/ 6];
 	}
 	if (chip == CHIP_RESURRECTION) {
-		return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/64, /*minRange*/0, 
-				/*maxRange*/3,/*cat*/CAT_VIE ,/*min*/200,/*max*/ 200, 
-				/*fail*/0.25,/*cost*/ 8];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 64, /*minRange*/ 0,
+		/*maxRange*/
+		3, /*cat*/ CAT_VIE, /*min*/ 200, /*max*/ 200,
+		/*fail*/
+		0.25, /*cost*/ 8];
 	} //ressusiter
 	if (chip == CHIP_STRETCHING) {
-	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/3, /*minRange*/0, 
-				/*maxRange*/5,/*cat*/CAT_BUF ,/*min*/50,/*max*/ 50, 
-				/*fail*/0.05,/*cost*/ 3];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 3, /*minRange*/ 0,
+		/*maxRange*/
+		5, /*cat*/ CAT_BUF, /*min*/ 50, /*max*/ 50,
+		/*fail*/
+		0.05, /*cost*/ 3];
 	} //+agi
 	if (chip == CHIP_PROTEIN) {
-	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/3, /*minRange*/0, 
-				/*maxRange*/4,/*cat*/CAT_BUF ,/*min*/50,/*max*/ 50, 
-				/*fail*/0.06,/*cost*/ 3];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 3, /*minRange*/ 0,
+		/*maxRange*/
+		4, /*cat*/ CAT_BUF, /*min*/ 50, /*max*/ 50,
+		/*fail*/
+		0.06, /*cost*/ 3];
 	} //+force
 	if (chip == CHIP_MOTIVATION) {
-	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/3, /*minRange*/0, 
-				/*maxRange*/5,/*cat*/CAT_BUF ,/*min*/1,/*max*/ 1, 
-				/*fail*/0.06,/*cost*/ 3];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 3, /*minRange*/ 0,
+		/*maxRange*/
+		5, /*cat*/ CAT_BUF, /*min*/ 1, /*max*/ 1,
+		/*fail*/
+		0.06, /*cost*/ 3];
 	} //+PT
 	if (chip == CHIP_LEATHER_BOOTS) {
-	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/3, /*minRange*/0, 
-				/*maxRange*/5,/*cat*/CAT_BUF ,/*min*/1,/*max*/ 1, 
-				/*fail*/0.05,/*cost*/ 3];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 3, /*minRange*/ 0,
+		/*maxRange*/
+		5, /*cat*/ CAT_BUF, /*min*/ 1, /*max*/ 1,
+		/*fail*/
+		0.05, /*cost*/ 3];
 	} //+PM
 	if (chip == CHIP_STEROID) {
-	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/4, /*minRange*/0, 
-				/*maxRange*/4,/*cat*/CAT_BUF ,/*min*/100,/*max*/ 100, 
-				/*fail*/0.05,/*cost*/ 6];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 4, /*minRange*/ 0,
+		/*maxRange*/
+		4, /*cat*/ CAT_BUF, /*min*/ 100, /*max*/ 100,
+		/*fail*/
+		0.05, /*cost*/ 6];
 	} //+force
 	if (chip == CHIP_WARM_UP) {
-	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/4, /*minRange*/0, 
-				/*maxRange*/4,/*cat*/CAT_BUF ,/*min*/100,/*max*/ 100, 
-				/*fail*/0.08,/*cost*/ 6];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 4, /*minRange*/ 0,
+		/*maxRange*/
+		4, /*cat*/ CAT_BUF, /*min*/ 100, /*max*/ 100,
+		/*fail*/
+		0.08, /*cost*/ 6];
 	} //+agi
 	if (chip == CHIP_WINGED_BOOTS) {
-	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/4, /*minRange*/0, 
-				/*maxRange*/3,/*cat*/CAT_BUF ,/*min*/1,/*max*/ 1, 
-				/*fail*/0.10,/*cost*/ 4];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 4, /*minRange*/ 0,
+		/*maxRange*/
+		3, /*cat*/ CAT_BUF, /*min*/ 1, /*max*/ 1,
+		/*fail*/
+		0.10, /*cost*/ 4];
 	} //+PM zone
 	if (chip == CHIP_ADRENALINE) {
-	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/4, /*minRange*/0, 
-				/*maxRange*/5,/*cat*/CAT_BUF ,/*min*/1,/*max*/ 1, 
-				/*fail*/0.08,/*cost*/ 5];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 4, /*minRange*/ 0,
+		/*maxRange*/
+		5, /*cat*/ CAT_BUF, /*min*/ 1, /*max*/ 1,
+		/*fail*/
+		0.08, /*cost*/ 5];
 	} //+PT zone
 	if (chip == CHIP_REFLEXES) {
-	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/5, /*minRange*/0, 
-				/*maxRange*/3,/*cat*/CAT_BUF ,/*min*/200,/*max*/ 200, 
-				/*fail*/0.06,/*cost*/ 8];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 5, /*minRange*/ 0,
+		/*maxRange*/
+		3, /*cat*/ CAT_BUF, /*min*/ 200, /*max*/ 200,
+		/*fail*/
+		0.06, /*cost*/ 8];
 	} //+agi
 	if (chip == CHIP_DOPING) {
-	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/5, /*minRange*/0, 
-				/*maxRange*/5,/*cat*/CAT_BUF ,/*min*/200,/*max*/ 200, 
-				/*fail*/0.14,/*cost*/ 7];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 5, /*minRange*/ 0,
+		/*maxRange*/
+		5, /*cat*/ CAT_BUF, /*min*/ 200, /*max*/ 200,
+		/*fail*/
+		0.14, /*cost*/ 7];
 	} //+force
 	if (chip == CHIP_SEVEN_LEAGUE_BOOTS) {
-	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/5, /*minRange*/0, 
-				/*maxRange*/2,/*cat*/CAT_BUF ,/*min*/2,/*max*/ 4, 
-				/*fail*/0.07,/*cost*/ 6];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 5, /*minRange*/ 0,
+		/*maxRange*/
+		2, /*cat*/ CAT_BUF, /*min*/ 2, /*max*/ 4,
+		/*fail*/
+		0.07, /*cost*/ 6];
 	} //+PM
 	if (chip == CHIP_RAGE) {
-	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/5, /*minRange*/0, 
-				/*maxRange*/3,/*cat*/CAT_BUF ,/*min*/2,/*max*/ 4, 
-				/*fail*/0.12,/*cost*/ 7];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 5, /*minRange*/ 0,
+		/*maxRange*/
+		3, /*cat*/ CAT_BUF, /*min*/ 2, /*max*/ 4,
+		/*fail*/
+		0.12, /*cost*/ 7];
 	} //+PT
 	if (chip == CHIP_LIBERATION) {
-		return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/5, /*minRange*/0, 
-				/*maxRange*/6,/*cat*/CAT_DEBUF ,/*min*/0,/*max*/ 0, 
-				/*fail*/0.07,/*cost*/ 5];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 5, /*minRange*/ 0,
+		/*maxRange*/
+		6, /*cat*/ CAT_DEBUF, /*min*/ 0, /*max*/ 0,
+		/*fail*/
+		0.07, /*cost*/ 5];
 	}
 	if (chip == CHIP_HELMET) {
-		return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/4, /*minRange*/0, 
-				/*maxRange*/4,/*cat*/CAT_DEF ,/*min*/15,/*max*/ 15, 
-				/*fail*/0.10,/*cost*/ 4]; //+flat
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 4, /*minRange*/ 0,
+		/*maxRange*/
+		4, /*cat*/ CAT_DEF, /*min*/ 15, /*max*/ 15,
+		/*fail*/
+		0.10, /*cost*/ 4]; //+flat
 	}
 	if (chip == CHIP_WALL) {
-		return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/5, /*minRange*/0, 
-				/*maxRange*/3,/*cat*/CAT_DEF ,/*min*/0.15,/*max*/ 0.15, 
-				/*fail*/0.06,/*cost*/ 4]; //+rel
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 5, /*minRange*/ 0,
+		/*maxRange*/
+		3, /*cat*/ CAT_DEF, /*min*/ 0.15, /*max*/ 0.15,
+		/*fail*/
+		0.06, /*cost*/ 4]; //+rel
 	}
 	if (chip == CHIP_SHIELD) {
-		return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/3, /*minRange*/0, 
-				/*maxRange*/4,/*cat*/CAT_DEF ,/*min*/8,/*max*/ 8, 
-				/*fail*/0.05,/*cost*/ 3]; //+flat
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 3, /*minRange*/ 0,
+		/*maxRange*/
+		4, /*cat*/ CAT_DEF, /*min*/ 8, /*max*/ 8,
+		/*fail*/
+		0.05, /*cost*/ 3]; //+flat
 	}
 	if (chip == CHIP_RAMPART) {
-		return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/4, /*minRange*/2, 
-				/*maxRange*/7,/*cat*/CAT_DEF ,/*min*/0.25,/*max*/ 0.25, 
-				/*fail*/0.05,/*cost*/ 6]; //+rel
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 4, /*minRange*/ 2,
+		/*maxRange*/
+		7, /*cat*/ CAT_DEF, /*min*/ 0.25, /*max*/ 0.25,
+		/*fail*/
+		0.05, /*cost*/ 6]; //+rel
 	}
 	if (chip == CHIP_ARMOR) {
-		return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/5, /*minRange*/0, 
-				/*maxRange*/4,/*cat*/CAT_DEF ,/*min*/25,/*max*/ 25, 
-				/*fail*/0.08,/*cost*/ 6]; //+flat
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 5, /*minRange*/ 0,
+		/*maxRange*/
+		4, /*cat*/ CAT_DEF, /*min*/ 25, /*max*/ 25,
+		/*fail*/
+		0.08, /*cost*/ 6]; //+flat
 	}
 	if (chip == CHIP_FORTRESS) {
-		return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/4, /*minRange*/0, 
-				/*maxRange*/3,/*cat*/CAT_DEF ,/*min*/0.40,/*max*/ 0.40, 
-				/*fail*/0.06,/*cost*/ 8]; //+rel
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 4, /*minRange*/ 0,
+		/*maxRange*/
+		3, /*cat*/ CAT_DEF, /*min*/ 0.40, /*max*/ 0.40,
+		/*fail*/
+		0.06, /*cost*/ 8]; //+rel
 	}
 	if (chip == CHIP_SHOCK) {
-	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/0, /*minRange*/0, 
-				/*maxRange*/6,/*cat*/CAT_ATK ,/*min*/5,/*max*/ 7, 
-				/*fail*/0.30,/*cost*/ 2];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 0, /*minRange*/ 0,
+		/*maxRange*/
+		6, /*cat*/ CAT_ATK, /*min*/ 5, /*max*/ 7,
+		/*fail*/
+		0.30, /*cost*/ 2];
 	} //zone
 	if (chip == CHIP_PEBBLE) {
-	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/1, /*minRange*/0, 
-				/*maxRange*/5,/*cat*/CAT_ATK ,/*min*/2,/*max*/ 17, 
-				/*fail*/0.09,/*cost*/ 2];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 1, /*minRange*/ 0,
+		/*maxRange*/
+		5, /*cat*/ CAT_ATK, /*min*/ 2, /*max*/ 17,
+		/*fail*/
+		0.09, /*cost*/ 2];
 	} //zone
 	if (chip == CHIP_SPARK) {
-	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/3, /*minRange*/0, 
-				/*maxRange*/10,/*cat*/CAT_ATK ,/*min*/8,/*max*/ 16, 
-				/*fail*/0.04,/*cost*/ 3];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 3, /*minRange*/ 0,
+		/*maxRange*/
+		10, /*cat*/ CAT_ATK, /*min*/ 8, /*max*/ 16,
+		/*fail*/
+		0.04, /*cost*/ 3];
 	} //passe au travers des obstacles
 	if (chip == CHIP_ICE) {
-	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/0, /*minRange*/0, 
-				/*maxRange*/8,/*cat*/CAT_ATK ,/*min*/17,/*max*/ 19, 
-				/*fail*/0.05,/*cost*/ 4];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 0, /*minRange*/ 0,
+		/*maxRange*/
+		8, /*cat*/ CAT_ATK, /*min*/ 17, /*max*/ 19,
+		/*fail*/
+		0.05, /*cost*/ 4];
 	} //zone
 	if (chip == CHIP_ROCK) {
-	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/1, /*minRange*/2, 
-				/*maxRange*/6,/*cat*/CAT_ATK ,/*min*/30,/*max*/ 31, 
-				/*fail*/0.08,/*cost*/ 5];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 1, /*minRange*/ 2,
+		/*maxRange*/
+		6, /*cat*/ CAT_ATK, /*min*/ 30, /*max*/ 31,
+		/*fail*/
+		0.08, /*cost*/ 5];
 	} //zone
 	if (chip == CHIP_FLASH) {
-	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/1, /*minRange*/1, 
-				/*maxRange*/7,/*cat*/CAT_ATK ,/*min*/19,/*max*/ 24, 
-				/*fail*/0.01,/*cost*/ 4];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 1, /*minRange*/ 1,
+		/*maxRange*/
+		7, /*cat*/ CAT_ATK, /*min*/ 19, /*max*/ 24,
+		/*fail*/
+		0.01, /*cost*/ 4];
 	} //zone
 	if (chip == CHIP_FLAME) {
-	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/0, /*minRange*/2, 
-				/*maxRange*/7,/*cat*/CAT_ATK ,/*min*/25,/*max*/ 27, 
-				/*fail*/0.10,/*cost*/ 4];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 0, /*minRange*/ 2,
+		/*maxRange*/
+		7, /*cat*/ CAT_ATK, /*min*/ 25, /*max*/ 27,
+		/*fail*/
+		0.10, /*cost*/ 4];
 	} //zone
 	if (chip == CHIP_STALACTITE) {
-	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/3, /*minRange*/2, 
-				/*maxRange*/7,/*cat*/CAT_ATK ,/*min*/64,/*max*/ 67, 
-				/*fail*/0.20,/*cost*/ 6];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 3, /*minRange*/ 2,
+		/*maxRange*/
+		7, /*cat*/ CAT_ATK, /*min*/ 64, /*max*/ 67,
+		/*fail*/
+		0.20, /*cost*/ 6];
 	} //zone
 	if (chip == CHIP_LIGHTNING) {
-	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/0, /*minRange*/2, 
-				/*maxRange*/6,/*cat*/CAT_ATK ,/*min*/35,/*max*/ 47, 
-				/*fail*/0.07,/*cost*/ 4];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 0, /*minRange*/ 2,
+		/*maxRange*/
+		6, /*cat*/ CAT_ATK, /*min*/ 35, /*max*/ 47,
+		/*fail*/
+		0.07, /*cost*/ 4];
 	} //zone
 	if (chip == CHIP_ROCKFALL) {
-	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/1, /*minRange*/5, 
-				/*maxRange*/7,/*cat*/CAT_ATK ,/*min*/48,/*max*/ 56, 
-				/*fail*/0.08,/*cost*/ 7];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 1, /*minRange*/ 5,
+		/*maxRange*/
+		7, /*cat*/ CAT_ATK, /*min*/ 48, /*max*/ 56,
+		/*fail*/
+		0.08, /*cost*/ 7];
 	} //zone
 	if (chip == CHIP_ICEBERG) {
-	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/3, /*minRange*/3, 
-				/*maxRange*/5,/*cat*/CAT_ATK ,/*min*/72,/*max*/ 80, 
-				/*fail*/0.05,/*cost*/ 7];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 3, /*minRange*/ 3,
+		/*maxRange*/
+		5, /*cat*/ CAT_ATK, /*min*/ 72, /*max*/ 80,
+		/*fail*/
+		0.05, /*cost*/ 7];
 	} //zone
 	if (chip == CHIP_METEORITE) {
-	return [/*actual cd*/getItem(chip, mychipsCd), /*cd*/3, /*minRange*/4, 
-				/*maxRange*/8,/*cat*/CAT_ATK ,/*min*/70,/*max*/ 80, 
-				/*fail*/0.04,/*cost*/ 8];
+		return [ /*actual cd*/ getItem(chip, myChipsCd), /*cd*/ 3, /*minRange*/ 4,
+		/*maxRange*/
+		8, /*cat*/ CAT_ATK, /*min*/ 70, /*max*/ 80,
+		/*fail*/
+		0.04, /*cost*/ 8];
 	} //zone
 }
 
@@ -368,12 +462,13 @@ function myGetChipEffects(chip) {
  * @param  {[type]} leek [description]
  * @return {[type]}      [description]
  */
-function whatIsYourPowerLevel(leek){
-	if(leek==null){
+function whatIsYourPowerLevel(leek) {
+	if (leek == null) {
 		return 0;
 	}
-	return [/*force*/getLife(leek)*(1+getForce(leek)/100), 
-			/*heal-def*/getLife(leek)*(1+getAgility(leek)/100)];//estimation de la fore à affiner
+	return [ /*force*/ getLife(leek) * (1 + getForce(leek) / 100),
+	/*heal-def*/
+	getLife(leek) * (1 + getAgility(leek) / 100)]; //estimation de la fore à affiner
 	//En fonction des chips et armes par exemple
 }
 
@@ -384,13 +479,72 @@ function whatIsYourPowerLevel(leek){
  * @param  {[type]} leek2 [description]
  * @return {[type]}       [description]
  */
-function compareleeks(leek1, leek2){
+function compareleeks(leek1, leek2) {
 	var pow1 = whatIsYourPowerLevel(leek1);
 	var pow2 = whatIsYourPowerLevel(leek2);
-	if(C_IMPORTANCE_FORCE*pow1[0]+C_IMPORTANCE_AGILITY*pow1[1] > C_IMPORTANCE_FORCE*pow2[0]+C_IMPORTANCE_AGILITY*pow2[1]){
+	if (C_IMPORTANCE_FORCE * pow1[0] + C_IMPORTANCE_AGILITY * pow1[1] > C_IMPORTANCE_FORCE * pow2[0] + C_IMPORTANCE_AGILITY * pow2[1]) {
 		return leek1;
 	}
 	return leek2;
+}
+
+/**
+ * fonction générique pour faire tout type d'action.
+ * action : action à faire (dans la liste des globales)
+ * cible : cible (un poireau, une cell)
+ * item : un item à utiliser (une chip, une arme)
+ * number : un nombre (pour les déplacements)
+ * @return : [result, statBefore, statAfter, item]
+ */
+function doAction(action, cible, item, number) {
+	if (action == ACTION_MOVEAWAY) {
+		var cellStart = getCell();
+		var result = moveAwayFromCell(cible, number); //Lv 19 => niv 5 : moveAwayFrom(leek, mp)
+		var cellEnd = getCell();
+		return [result, cellStart, cellEnd, null];
+	}
+	if (action == ACTION_MOVETOWARD) {
+		var cellStart = getCell();
+		var result = moveTowardCell(cible, number);
+		var cellEnd = getCell();
+		return [result, cellStart, cellEnd, null];
+	}
+	if (action == ACTION_EQUIP_WEAPON) {
+		setWeapon(item);
+		if (getWeapon() == -1) {
+			setWeapon(myWeapons[0]);
+		}
+		return [getWeapon(), null, null, null];
+	}
+	if (action == ACTION_USE_WEAPON) {
+		if (getWeapon() == -1) {
+			setWeapon(myWeapons[0]);
+		}
+		var lifeBefore = getLife(cible);
+		var result = useWeapon(cible);
+		var lifeAfter = getLife(cible);
+		return [result, lifeBefore, lifeAfter, getWeapon()];
+	}
+	if (action == ACTION_USE_CHIP) {
+		if (getItem(item, myChipsCd) != null) {
+			var cat = myGetChipEffects(item)[CHIPEF_CAT];
+			var lifeBefore = getLife(cible);
+			var result = useChip(item, cible);
+			//setInCD
+			if (result == USE_SUCCESS) {
+				debug("setIn CD : "+getChipName(item)+ "CD : "+myGetChipEffects(item)[CHIPEF_TOTALCD]);
+				setItem(item, myGetChipEffects(item)[CHIPEF_TOTALCD], myChipsCd);
+			}
+			//make stats
+			if (cat == CAT_ATK || cat == CAT_VIE) {
+				var lifeAfter = getLife(cible);
+				return [result, lifeBefore, lifeAfter, item];
+
+			}
+			return [result, null, null, item];
+		}
+	}
+	return null;
 }
 
 /**
@@ -399,9 +553,12 @@ function compareleeks(leek1, leek2){
  * @param  {[type]} cible  [description]
  * @return {[type]}        [description]
  */
-function doAction(action, cible){
-	if(action==ACTION_USE_WEAPON){
-		return doAction(action, cible, null, 0);
+function doAction2P(action, cible_Item) {
+	if (action == ACTION_USE_WEAPON) {
+		return doAction(ACTION_USE_WEAPON, cible_Item, null, 0);
+	}
+	if (action == ACTION_EQUIP_WEAPON) {
+		return doAction(ACTION_EQUIP_WEAPON, null, cible_Item, 0);
 	}
 	return BAD_ACTION_TYPE;
 }
@@ -413,64 +570,14 @@ function doAction(action, cible){
  * @param  {[type]} item   [description]
  * @return {[type]}        [description]
  */
-function doAction(action, cible, item){
-	if(action!=ACTION_MOVEAWAY&&action!=ACTION_MOVETOWARD){
-		return doAction(action, cible, item, 0);
+function doAction3P(action, cible, item_number) {
+	if (action != ACTION_MOVEAWAY && action != ACTION_MOVETOWARD) {
+		return doAction(action, cible, item_number, 0);
+	}
+	if (action == ACTION_MOVETOWARD || action == ACTION_MOVEAWAY) {
+		return doAction(action, cible, null, item_number);
 	}
 	return BAD_ACTION_TYPE;
-}
-
-/**
- * fonction générique pour faire tout type d'action.
- * action : action à faire (dans la liste des globales)
- * cible : cible (un poireau, une cell)
- * item : un item à utiliser (une chip, une arme)
- * number : un nombre (pour les déplacements)
- * @return : [result, statBefore, statAfter]
- */
-function doAction(action, cible, item, number){
-	if(action==ACTION_MOVEAWAY){
-		var cellStart = getCell();
-		var result = moveAwayFromCell(cible, number);//Lv 19 => niv 5 : moveAwayFrom(leek, mp)
-		var cellEnd = getCell();
-		return[result, cellStart, cellEnd];
-	}
-	if(action==ACTION_MOVETOWARD){
-		var cellStart = getCell();
-		var result = moveTowardCell(cible, number);
-		var cellEnd = getCell();
-		return[result, cellStart, cellEnd];
-	}
-	if(action==ACTION_EQUIP_WEAPON){
-		setWeapon(item);
-		if(getWeapon()==-1){
-			setWeapon(myWeapons[0]);
-		}
-		return [getWeapon()];
-	}
-	if(action==ACTION_USE_WEAPON){
-		if(getWeapon()==-1){
-			setWeapon(myWeapons[0]);
-		}
-		var lifeBefore = getLife(cible);
-		var result = useWeapon(cible);
-		var lifeAfter = getLife(cible);
-		return [result, lifeBefore, lifeAfter];
-	}
-	if(action==ACITON_USE_CHIP){
-		if(getItem(item, mychipsCd)!=null){
-			var cat = myGetChipEffects(item)[CHIPEF_CAT];
-			if(cat == CAT_ATK || cat == CAT_VIE){
-				var lifeBefore = getLife(cible);
-				var result = useChip(item, cible);
-				var lifeAfter = getLife(cible);
-				return [result, lifeBefore, lifeAfter];
-
-			}
-			return [useChip(item, cible)];
-		}
-	}
-	return null;
 }
 
 /**
@@ -479,21 +586,21 @@ function doAction(action, cible, item, number){
  * @param  {[type]} item [description]
  * @return {[type]}      [description]
  */
-function estimateDamage(item){
+function estimateDamage(item) {
 
-	if(getItem(item, mychipsCd)!=null){
+	if (getItem(item, myChipsCd) != null) {
 		var effects = myGetChipEffects(item);
-		if(effects[CHIPEF_CAT]==CAT_ATK){
+		if (effects[CHIPEF_CAT] == CAT_ATK) {
 			var force = getForce();
-			return [effects[CHIPEF_STAT_MIN]*(1+force/100),effects[CHIPEF_STAT_MAX]*(1+force/100)];
+			return [effects[CHIPEF_STAT_MIN] * (1 + force / 100), effects[CHIPEF_STAT_MAX] * (1 + force / 100)];
 		}
 	}
-	if(item==getWeapon()){
+	if (item == getWeapon()) {
 		var effects = myGetWeaponEffects(item);
-		force = getForce();
-		return [effects[WEAPONEF_DAMAGE_MIN]*(1+force/100),effects[WEAPONEF_DAMAGE_MAX]*(1+force/100)];
+		var force = getForce();
+		return [effects[WEAPONEF_DAMAGE_MIN] * (1 + force / 100), effects[WEAPONEF_DAMAGE_MAX] * (1 + force / 100)];
 	}
-	return 0;
+	return [0, 0];
 }
 
 /**
@@ -506,9 +613,14 @@ function initTurn() {
 	turn++;
 	//Mise à jour des cooldowns
 	var value = 0;
-	for(var chip in myChips){
-		value = max(0, getItem(chip, mychipsCd)-1);
-		setItem(chip, value, mychipsCd);
+	for (var chip in myChips) {
+
+		value = max(0, getItem(chip, myChipsCd) - 1);
+		setItem(chip, value, myChipsCd);
+		if(chip==CHIP_HELMET){
+			debug("value = "+value);
+			debug("value in list="+getItem(chip, myChipsCd));
+		}
 	}
 }
 
@@ -519,24 +631,448 @@ function initTurn() {
  */
 function initGame() {
 	//initialisation des chips
-	for(var chip in myChips){
-		setItem(chip, 0, mychipsCd);
+	for (var chip in myChips) {
+		debug("chip : "+getChipName(chip)+"//ID : "+chip);
+		setItem(chip, 0, myChipsCd);
+	}
+	for(var weapon in getWeapons()){
+		debug("weapon : "+getWeaponName(weapon)+"//ID : "+weapon);
 	}
 	//initialisation de l'ennemie courant
-	for(var enn in enemies){
+	for (var enn in enemies) {
 		curentEnemy = compareleeks(curentEnemy, enn);
 	}
 }
 
+/**
+ * globales associées à la fonction <analyzeAttack>
+ */
+global PROTECTION_NULL = "PROTECTION_NULL";
+//protection flat >=30
+global PROTECTION_30 = "PROTECTION_30";
+//protection flat >=15
+global PROTECTION_15 = "PROTECTION_15";
+//protection faible
+global PROTECTION_LOW = "PROTECTION_LOW";
+//global cant estimate
+global PROTECTION_CANT_ESTIMATE = "PROTECTION_CANT_ESTIMATE";
+/**
+ * determine si un ennemi dispose de protections.
+ * estime son niveau de protection
+ * @param  {[type]} resultOfDoAction [resultat de la fonction doAction]
+ * @return {[type]}                  [Protection, flatReduc[], percentReduc[]]
+ */
+function analyzeAttack(resultOfDoAction) {
+	//asserts
+	if (resultOfDoAction == null) {
+		debug("[analyzeAttack] erreur, resultOfDoAction null");
+		return;
+	}
+	if (resultOfDoAction == BAD_ACTION_TYPE) {
+		debug("[analyzeAttack] erreur, resultOfDoAction BAD_ACTION_TYPE");
+		return;
+	}
+	//extraction des données d'entrée
+	var item = resultOfDoAction[3];
+	var result = resultOfDoAction[0];
+	var lifeBefore = resultOfDoAction[1];
+	var lifeAfter = resultOfDoAction[2];
+
+	debug("[analyzeAttack] damage="+(lifeBefore-lifeAfter));
+	if(item==getWeapon()){debug("[analyzeAttack] item="+getWeaponName(item));}
+	if(getItem(item, myChipsCd)==null){if(item==getWeapon()){debug("[analyzeAttack] item="+getChipName(item));}}
+	debug("[analyzeAttack] result="+result);
+	if (result == USE_SUCCESS //result success
+	//l'item est l'arme équipée OU une chip de la catégorie attaque
+	&&
+	(item == getWeapon() || myGetChipEffects(item)[CHIPEF_CAT] == CAT_ATK)) {
+		debug("dans la boucle!!");
+		//calcul des dommages fait
+		var damages = lifeBefore-lifeAfter;
+		//calcul de l'estimation des dommages
+		var theorikDamage = estimateDamage(item);
+		debug("damage="+damages+"//estimation="+theorikDamage[0]+" à "+theorikDamage[1]);
+		if (damages < theorikDamage[0]) {
+			var percentReduc = [];
+			var flatReduc = [];
+			//estime le pourcentage de réduction de l'adversaire.
+			percentReduc[0] = (theorikDamage[0] - damages) / theorikDamage[0];
+			percentReduc[1] = (theorikDamage[1] - damages) / theorikDamage[1];
+			//estime la réduction flat de l'adversaire
+			flatReduc[0] = theorikDamage[0] - damages;
+			flatReduc[1] = theorikDamage[1] - damages;
+			debug("flatReduc="+flatReduc[0]);
+			if ((flatReduc[0]+flatReduc[1])/2 >= 30) {
+				return [PROTECTION_30, flatReduc, percentReduc];
+			}
+			if ((flatReduc[0]+flatReduc[1])/2 >= 15) {
+				return [PROTECTION_15, flatReduc, percentReduc];
+			}
+			return [PROTECTION_LOW, flatReduc, percentReduc];
+		}
+		return [PROTECTION_NULL, [0, 0], [0, 0]];
+	}
+	return [PROTECTION_CANT_ESTIMATE, [0, 0], [0, 0]];
+}
+/**
+ * globals pour countProtectedTurns
+ */
+global protectedTurn = 0;
+/**
+ * compte en fonction du résultat d'une attaque le nombre de tours protégés
+ * @param  {[type]} result [description]
+ * @return {[type]}        [description]
+ */
+function countProtectedTurns(result) {
+	//estimation de la protection
+	if (result[0] == PROTECTION_30 || result[0] == PROTECTION_15) {
+		protectedTurn++;
+	}
+	if (result[0] == PROTECTION_NULL || result[0] == PROTECTION_LOW) {
+		protectedTurn = 0; //reset
+		debug("enemi sans protection!!");
+	}
+	if (result[0] == PROTECTION_CANT_ESTIMATE && protectedTurn > 0) {
+		protectedTurn++;
+	}
+}
+
+/**
+ * récupère le meilleur ennemi vivant
+ * @return {[type]} [description]
+ */
+function getNewEnemy(){
+	curentEnemy=getNearestEnemy();
+	for (var enn in enemies) {
+		if(isAlive(enn)){
+			curentEnemy = compareleeks(curentEnemy, enn);
+		}
+	}
+}
+/**
+ * système IA simple :
+ * on avance. si on arrive à moins de 19m de l'enemi on lance étirement.
+ * on avance, si moins de 14m on lance proteines et casque
+ * on avance si on peut attaquer : double flame
+ * 
+ */
+function turnBasic() {
+	//var start
+	var myCell = getCell();
+	var curentEnemyCell = getCell(curentEnemy);
+	var distanceMeEnemy = getCellDistance(myCell, curentEnemyCell);
+	var myMP = getMP();
+	var myLife = getLife();
+	//var pour attaque
+	var cellForWeapon = getCellToUseWeapon(WEAPON_SHOTGUN);
+	var distanceForUseWeapon = getCellDistance(myCell, cellForWeapon);
+	var cellForLazer = getCellToUseWeapon(WEAPON_LASER);
+	var distanceForUseLazer = getCellDistance(myCell, cellForLazer);
+	var cellForFlame = getCellToUseChip(CHIP_FLAME, curentEnemy);
+	var distanceForUseFlame = getCellDistance(myCell, cellForFlame);
+	debug("distance arme : "+distanceForUseWeapon + " //distance flame : "+distanceForUseFlame);
+	distanceForUseWeapon = 4;
+	distanceForUseFlame = 4;
+	debug("distance arme : "+distanceForUseWeapon + " //distance flame : "+distanceForUseFlame);
+
+	//Actions
+	if (turn == 1) {
+		doAction2P(ACTION_EQUIP_WEAPON, WEAPON_SHOTGUN);
+		doAction3P(ACTION_MOVETOWARD, curentEnemyCell, myMP);
+		doAction3P(ACTION_USE_CHIP, me, CHIP_STRETCHING);
+		return;
+	}
+	if (turn==2) { //déplacement + agi (préparation casque)
+		doAction3P(ACTION_MOVETOWARD, curentEnemyCell, myMP);
+		doAction3P(ACTION_USE_CHIP, me, CHIP_HELMET);
+		doAction3P(ACTION_USE_CHIP, curentEnemy, CHIP_SPARK);
+		return;
+	}
+	if (turn==3) { //déplacement + casque + proteine
+		doAction3P(ACTION_MOVETOWARD, cellForWeapon, myMP);
+		doAction3P(ACTION_USE_CHIP, me, CHIP_PROTEIN);
+		doAction2P(ACTION_USE_WEAPON, curentEnemy);
+		return;
+	}
+
+	//#######################CONDITIONs DE SURVIE#######################
+	if (myLife <= getTotalLife() * 0.45 && myGetChipEffects(CHIP_HELMET)[CHIPEF_ACTUALCD] != 1) {
+		debug("cas 1 de survie");
+
+		//déplacement
+		
+		
+
+		//données
+		var result;
+
+
+		//Actions défensives
+		if (myGetChipEffects(CHIP_HELMET)[CHIPEF_ACTUALCD] == 0) {
+			result = doAction3P(ACTION_USE_CHIP, me, CHIP_HELMET);
+		}
+		if (myGetChipEffects(CHIP_CURE)[CHIPEF_ACTUALCD] == 0) {
+			result = doAction3P(ACTION_USE_CHIP, me, CHIP_CURE);
+		}
+		if (getLife()<getTotalLife()*0.45) {
+			doAction3P(ACTION_USE_CHIP, me, CHIP_BANDAGE);
+		}
+
+
+		//attaque
+		if(getTP()>=5){
+			doAction3P(ACTION_MOVETOWARD, curentEnemyCell, getMP());
+			result = analyzeAttack(doAction2P(ACTION_USE_WEAPON, curentEnemy));
+			countProtectedTurns(result);
+			doAction3P(ACTION_MOVETOWARD, curentEnemyCell, getMP());
+			return;	
+		}
+		doAction3P(ACTION_MOVETOWARD, cellForFlame, distanceForUseFlame);
+		result = analyzeAttack(doAction3P(ACTION_USE_CHIP, curentEnemy, CHIP_FLAME));
+		countProtectedTurns(result);
+		doAction3P(ACTION_MOVETOWARD, curentEnemyCell, getMP());
+		return;
+	} //Cas survie 1
+
+
+
+	if (myLife <= getTotalLife() * 0.55 && myGetChipEffects(CHIP_HELMET)[CHIPEF_ACTUALCD] == 1) {
+		debug("cas 2 de survie");
+
+		//déplacement
+		
+
+
+		//données
+		var result;
+
+
+		//Actions défensives
+		if (myGetChipEffects(CHIP_CURE)[CHIPEF_ACTUALCD] == 0) {
+			result = doAction3P(ACTION_USE_CHIP, me, CHIP_CURE);
+		}
+		if (getLife()<getTotalLife() * 0.55) {
+			doAction3P(ACTION_USE_CHIP, me, CHIP_BANDAGE);
+		}
+
+
+		//attaque
+		if(getTP()>=5){
+			doAction3P(ACTION_MOVETOWARD, curentEnemyCell, distanceForUseWeapon);
+			result = analyzeAttack(doAction2P(ACTION_USE_WEAPON, curentEnemy));
+			countProtectedTurns(result);
+			doAction3P(ACTION_MOVETOWARD, curentEnemyCell, getMP());
+			return;	
+		}
+		doAction3P(ACTION_MOVETOWARD, cellForFlame, distanceForUseFlame);
+		result = analyzeAttack(doAction3P(ACTION_USE_CHIP, curentEnemy, CHIP_FLAME));
+		countProtectedTurns(result);
+		doAction3P(ACTION_MOVETOWARD, curentEnemyCell, getMP());
+		return;
+	} //Cas survie 2
+
+	//#######################ATTAQUE#######################
+	//Attaque par défaut
+	if (myGetChipEffects(CHIP_HELMET)[CHIPEF_ACTUALCD] == 3) {
+		debug("proteine + arme => CD casque 3");
+		//déplacement
+		doAction3P(ACTION_MOVETOWARD, curentEnemyCell, distanceForUseWeapon);
+		debug("distance ="+distanceForUseWeapon+ "test="+getCell()==cellForWeapon);
+		//Actions
+		if (myGetChipEffects(CHIP_PROTEIN)[CHIPEF_ACTUALCD] == 0) {
+			doAction3P(ACTION_USE_CHIP, me, CHIP_PROTEIN);
+		}
+		var result = analyzeAttack(doAction2P(ACTION_USE_WEAPON, curentEnemy));
+		if(result[0]==USE_INVALID_POSITION){
+			result = analyzeAttack(doAction3P(ACTION_USE_CHIP, curentEnemy, CHIP_FLAME));
+		}
+		countProtectedTurns(result);
+		if (getMP() >= 2) {
+			doAction3P(ACTION_USE_CHIP, me, CHIP_BANDAGE);
+		}
+		doAction3P(ACTION_MOVETOWARD, curentEnemyCell, getMP());
+		return;
+	}
+
+	//Si l'ennemi est sans protection on attaque
+	if (myGetChipEffects(CHIP_HELMET)[CHIPEF_ACTUALCD] == 2) {
+		debug("double flame => CD casque 2");
+		//déplacement
+		doAction3P(ACTION_MOVETOWARD, cellForFlame, distanceForUseFlame);
+
+		//Actions
+		var result = analyzeAttack(doAction3P(ACTION_USE_CHIP, curentEnemy, CHIP_FLAME));
+		countProtectedTurns(result);
+		if (protectedTurn == 0) {
+			debug("2eme flame");
+			doAction3P(ACTION_USE_CHIP, curentEnemy, CHIP_FLAME);
+			doAction3P(ACTION_MOVETOWARD, curentEnemyCell, getMP());
+			return;
+		}
+		if (myGetChipEffects(CHIP_CURE)[CHIPEF_ACTUALCD] == 0) {
+			debug("cure");
+			doAction3P(ACTION_USE_CHIP, me, CHIP_CURE);
+			doAction3P(ACTION_MOVETOWARD, curentEnemyCell, getMP());
+			return;
+		}
+		debug("bandage");
+		doAction3P(ACTION_USE_CHIP, me, CHIP_BANDAGE);
+		doAction3P(ACTION_MOVETOWARD, curentEnemyCell, getMP());
+		return;
+	}
+
+	//Attaque par défaut
+	if (myGetChipEffects(CHIP_HELMET)[CHIPEF_ACTUALCD] == 1) {
+		debug("etirement + arme => CD casque 1");
+		//déplacement
+		doAction3P(ACTION_MOVETOWARD, curentEnemyCell, distanceForUseWeapon);
+		debug("distance ="+distanceForUseWeapon+ "test="+getCell()==cellForWeapon);
+
+		//Actions
+		if (myGetChipEffects(CHIP_STRETCHING)[CHIPEF_ACTUALCD] == 0) {
+			doAction3P(ACTION_USE_CHIP, me, CHIP_STRETCHING);
+		}
+		var result = analyzeAttack(doAction2P(ACTION_USE_WEAPON, curentEnemy));
+		if(result[0]==USE_INVALID_POSITION){
+			result = analyzeAttack(doAction3P(ACTION_USE_CHIP, curentEnemy, CHIP_FLAME));
+		}
+		countProtectedTurns(result);
+		if (getMP() >= 2) {
+			doAction3P(ACTION_USE_CHIP, me, CHIP_BANDAGE);
+		}
+		doAction3P(ACTION_MOVETOWARD, curentEnemyCell, getMP());
+		return;
+	}
+
+	//Si l'ennemi est sans protection on attaque au lieu de lancer casque
+	if (myGetChipEffects(CHIP_HELMET)[CHIPEF_ACTUALCD] == 0) {
+		debug("casque + flame => CD casque 0");
+		//Déplacement
+		doAction3P(ACTION_MOVETOWARD, cellForFlame, distanceForUseFlame);
+
+		//Actions
+		var result = analyzeAttack(doAction3P(ACTION_USE_CHIP, curentEnemy, CHIP_FLAME));
+		countProtectedTurns(result);
+		if (protectedTurn == 0) {
+			debug("2eme flame à la place du casque");
+			doAction3P(ACTION_USE_CHIP, curentEnemy, CHIP_FLAME);
+			doAction3P(ACTION_MOVETOWARD, curentEnemyCell, getMP());
+			return;
+		}
+		debug("res="+doAction3P(ACTION_USE_CHIP, me, CHIP_HELMET)[0]);
+		doAction3P(ACTION_MOVETOWARD, curentEnemyCell, getMP());
+		return;
+	}
+
+	//Actions par défaut
+	doAction3P(ACTION_MOVETOWARD, curentEnemyCell, myMP);
+	if (myGetChipEffects(CHIP_HELMET)[CHIPEF_ACTUALCD] == 0) {
+		doAction3P(ACTION_USE_CHIP, me, CHIP_HELMET);
+	}
+	doAction3P(ACTION_USE_CHIP, me, CHIP_BANDAGE);
+}
+
+function lazerProfil(){
+	//var start
+	var myCell = getCell();
+	var curentEnemyCell = getCell(curentEnemy);
+	var distanceMeEnemy = getCellDistance(myCell, curentEnemyCell);
+	var myMP = getMP();
+	var myLife = getLife();
+	//var pour attaque
+	var cellForWeapon = getCellToUseWeapon(WEAPON_SHOTGUN);
+	var distanceForUseWeapon = getCellDistance(myCell, cellForWeapon);
+	var cellForLazer = getCellToUseWeapon(WEAPON_LASER);
+	var distanceForUseLazer = getCellDistance(myCell, cellForLazer);
+	var cellForFlame = getCellToUseChip(CHIP_FLAME, curentEnemy);
+	var distanceForUseFlame = getCellDistance(myCell, cellForFlame);
+	debug("distance arme : "+distanceForUseLazer + " //distance flame : "+distanceForUseFlame);
+	distanceForUseLazer = 4;
+	distanceForUseFlame = 4;
+	debug("distance arme : "+distanceForUseLazer + " //distance flame : "+distanceForUseFlame);
+	
+
+	//###################################Initialisation#######################################
+	if (turn == 1) {
+		doAction2P(ACTION_EQUIP_WEAPON, WEAPON_LASER);
+		doAction3P(ACTION_MOVETOWARD, curentEnemyCell, myMP);
+		doAction3P(ACTION_USE_CHIP, me, CHIP_STRETCHING);
+		return;
+	}
+	if (turn==2) { //déplacement + agi (préparation casque)
+		doAction3P(ACTION_MOVETOWARD, curentEnemyCell, myMP);
+		doAction3P(ACTION_USE_CHIP, me, CHIP_HELMET);
+		doAction3P(ACTION_USE_CHIP, curentEnemy, CHIP_SPARK);
+		return;
+	}
+	if (turn==3) { //déplacement + casque + proteine
+		doAction3P(ACTION_MOVETOWARD, cellForWeapon, myMP);
+		doAction3P(ACTION_USE_CHIP, me, CHIP_PROTEIN);//3
+		doAction3P(ACTION_USE_CHIP, me, CHIP_BANDAGE);//3
+		return;
+	}
+	//###################################SURVIE###############################################
+	//###################################CYCLE NORMAL#########################################
+	if(myGetChipEffects(CHIP_HELMET)[CHIPEF_ACTUALCD] == 0){
+		//déplacement
+		doAction3P(ACTION_MOVETOWARD, cellForLazer, myMP);
+
+		//Actions
+		doAction3P(ACTION_USE_CHIP, me, CHIP_HELMET);//4
+		doAction3P(ACTION_USE_CHIP, me, CHIP_PROTEIN);//4
+
+		doAction3P(ACTION_MOVETOWARD, curentEnemyCell, getMP());
+		return;
+	}
+	if(myGetChipEffects(CHIP_HELMET)[CHIPEF_ACTUALCD] == 1){
+		//déplacement
+		doAction3P(ACTION_MOVETOWARD, cellForLazer, myMP);
+
+		//Actions
+		doAction3P(ACTION_USE_CHIP, me, CHIP_STRETCHING);//4
+		doAction3P(ACTION_USE_CHIP, me, CHIP_CURE);//4
+
+		doAction3P(ACTION_MOVETOWARD, curentEnemyCell, getMP());
+		return;
+	}
+	if(myGetChipEffects(CHIP_HELMET)[CHIPEF_ACTUALCD] == 2){
+		//déplacement
+		doAction3P(ACTION_MOVETOWARD, cellForLazer, myMP);
+
+		//Actions
+		doAction2P(ACTION_USE_WEAPON, curentEnemy)
+		doAction3P(ACTION_USE_CHIP, me, CHIP_BANDAGE);//2
+
+		doAction3P(ACTION_MOVETOWARD, curentEnemyCell, getMP());
+		return;
+	}
+	if(myGetChipEffects(CHIP_HELMET)[CHIPEF_ACTUALCD] == 3){
+		
+		if(myLife<=0.50*getTotalLife()){
+			doAction3P(ACTION_USE_CHIP, me, CHIP_CURE);//4			
+			doAction3P(ACTION_USE_CHIP, me, CHIP_FLAME);//4
+		}
+
+		//déplacement
+		doAction3P(ACTION_MOVETOWARD, cellForLazer, myMP);
+		
+		//Actions
+		doAction2P(ACTION_USE_WEAPON, curentEnemy)
+		doAction3P(ACTION_USE_CHIP, me, CHIP_BANDAGE);//2
+
+		doAction3P(ACTION_MOVETOWARD, curentEnemyCell, getMP());
+		return;
+	}
+}
 //##################################################################################################################
 //#                                                      MAIN                                                      #
 //##################################################################################################################
 initTurn();
-if(turn==1){initGame();}
+if (turn == 1) {
+	initGame();
+}
 
-debug("##############################");
-
-if(myGetWeaponEffects(getWeapon())[6/*Inline*/]==RANGE_INLINE){//Niv 7 : conditionner le comportement si l'autre
-																// a une arme inline (rester à 5 de distance)
-
+turnBasic();
+if(isDead(urentEnemy)){
+	getNewEnemy();
 }
