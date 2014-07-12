@@ -764,10 +764,10 @@ function turnBasic() {
 	var myMP = getMP();
 	var myLife = getLife();
 	//var pour attaque
-	var cellForWeapon = getCellToUseWeapon(WEAPON_SHOTGUN);
+	var cellForWeapon = getCellToUseWeapon(curentEnemy);
 	var distanceForUseWeapon = getCellDistance(myCell, cellForWeapon);
-	var cellForLazer = getCellToUseWeapon(WEAPON_LASER);
-	var distanceForUseLazer = getCellDistance(myCell, cellForLazer);
+	//var cellForLazer = getCellToUseWeapon(WEAPON_LASER);
+	//var distanceForUseLazer = getCellDistance(myCell, cellForLazer);
 	var cellForFlame = getCellToUseChip(CHIP_FLAME, curentEnemy);
 	var distanceForUseFlame = getCellDistance(myCell, cellForFlame);
 	debug("distance arme : "+distanceForUseWeapon + " //distance flame : "+distanceForUseFlame);
@@ -980,9 +980,9 @@ function lazerProfil(){
 	var myMP = getMP();
 	var myLife = getLife();
 	//var pour attaque
-	var cellForWeapon = getCellToUseWeapon(WEAPON_SHOTGUN);
-	var distanceForUseWeapon = getCellDistance(myCell, cellForWeapon);
-	var cellForLazer = getCellToUseWeapon(WEAPON_LASER);
+	var cellForLazer = getCellToUseWeapon(curentEnemy);
+	var distanceForUseWeapon = getCellDistance(myCell, cellForLazer);
+	//var cellForLazer = getCellToUseWeapon(WEAPON_LASER);
 	var distanceForUseLazer = getCellDistance(myCell, cellForLazer);
 	var cellForFlame = getCellToUseChip(CHIP_FLAME, curentEnemy);
 	var distanceForUseFlame = getCellDistance(myCell, cellForFlame);
@@ -1006,7 +1006,7 @@ function lazerProfil(){
 		return;
 	}
 	if (turn==3) { //déplacement + casque + proteine
-		doAction3P(ACTION_MOVETOWARD, cellForWeapon, myMP);
+		doAction3P(ACTION_MOVETOWARD, cellForLazer, myMP);
 		doAction3P(ACTION_USE_CHIP, me, CHIP_PROTEIN);//3
 		doAction3P(ACTION_USE_CHIP, me, CHIP_BANDAGE);//3
 		return;
@@ -1018,9 +1018,13 @@ function lazerProfil(){
 		doAction3P(ACTION_MOVETOWARD, cellForLazer, myMP);
 
 		//Actions
-		doAction3P(ACTION_USE_CHIP, me, CHIP_HELMET);//4
-		doAction3P(ACTION_USE_CHIP, me, CHIP_PROTEIN);//4
-
+		if(myLife<getTotalLife()*0.5||turn<=7){
+			doAction3P(ACTION_USE_CHIP, me, CHIP_HELMET);//4
+			doAction3P(ACTION_USE_CHIP, me, CHIP_PROTEIN);//4
+		} else {
+			doAction2P(ACTION_USE_WEAPON, curentEnemy);
+			doAction3P(ACTION_USE_CHIP, me, CHIP_BANDAGE);//2
+		}
 		doAction3P(ACTION_MOVETOWARD, curentEnemyCell, getMP());
 		return;
 	}
@@ -1029,8 +1033,13 @@ function lazerProfil(){
 		doAction3P(ACTION_MOVETOWARD, cellForLazer, myMP);
 
 		//Actions
-		doAction3P(ACTION_USE_CHIP, me, CHIP_STRETCHING);//4
-		doAction3P(ACTION_USE_CHIP, me, CHIP_CURE);//4
+		if(myLife<getTotalLife()*0.5){
+			doAction3P(ACTION_USE_CHIP, me, CHIP_STRETCHING);//4
+			doAction3P(ACTION_USE_CHIP, me, CHIP_CURE);//4
+		} else {
+			doAction2P(ACTION_USE_WEAPON, curentEnemy);
+			doAction3P(ACTION_USE_CHIP, me, CHIP_BANDAGE);//2
+		}
 
 		doAction3P(ACTION_MOVETOWARD, curentEnemyCell, getMP());
 		return;
@@ -1040,7 +1049,7 @@ function lazerProfil(){
 		doAction3P(ACTION_MOVETOWARD, cellForLazer, myMP);
 
 		//Actions
-		doAction2P(ACTION_USE_WEAPON, curentEnemy)
+		doAction2P(ACTION_USE_WEAPON, curentEnemy);
 		doAction3P(ACTION_USE_CHIP, me, CHIP_BANDAGE);//2
 
 		doAction3P(ACTION_MOVETOWARD, curentEnemyCell, getMP());
@@ -1048,16 +1057,11 @@ function lazerProfil(){
 	}
 	if(myGetChipEffects(CHIP_HELMET)[CHIPEF_ACTUALCD] == 3){
 		
-		if(myLife<=0.50*getTotalLife()){
-			doAction3P(ACTION_USE_CHIP, me, CHIP_CURE);//4			
-			doAction3P(ACTION_USE_CHIP, me, CHIP_FLAME);//4
-		}
-
 		//déplacement
 		doAction3P(ACTION_MOVETOWARD, cellForLazer, myMP);
 		
 		//Actions
-		doAction2P(ACTION_USE_WEAPON, curentEnemy)
+		doAction2P(ACTION_USE_WEAPON, curentEnemy);
 		doAction3P(ACTION_USE_CHIP, me, CHIP_BANDAGE);//2
 
 		doAction3P(ACTION_MOVETOWARD, curentEnemyCell, getMP());
@@ -1072,7 +1076,7 @@ if (turn == 1) {
 	initGame();
 }
 
-turnBasic();
-if(isDead(urentEnemy)){
+lazerProfil();
+if(isDead(curentEnemy)){
 	getNewEnemy();
 }
