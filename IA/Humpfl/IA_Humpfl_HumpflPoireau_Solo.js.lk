@@ -714,6 +714,7 @@ function analyzeAttack(resultOfDoAction) {
 	}
 	return [PROTECTION_CANT_ESTIMATE, [0, 0], [0, 0]];
 }
+
 /**
  * globals pour countProtectedTurns
  */
@@ -749,6 +750,7 @@ function getNewEnemy(){
 		}
 	}
 }
+
 /**
  * système IA simple :
  * on avance. si on arrive à moins de 19m de l'enemi on lance étirement.
@@ -1018,13 +1020,9 @@ function lazerProfil(){
 		doAction3P(ACTION_MOVETOWARD, cellForLazer, myMP);
 
 		//Actions
-		if(myLife<getTotalLife()*0.5||turn<=7){
-			doAction3P(ACTION_USE_CHIP, me, CHIP_HELMET);//4
-			doAction3P(ACTION_USE_CHIP, me, CHIP_PROTEIN);//4
-		} else {
-			doAction2P(ACTION_USE_WEAPON, curentEnemy);
-			doAction3P(ACTION_USE_CHIP, me, CHIP_BANDAGE);//2
-		}
+		doAction3P(ACTION_USE_CHIP, me, CHIP_HELMET);//4
+		doAction3P(ACTION_USE_CHIP, me, CHIP_MOTIVATION);//4
+		
 		doAction3P(ACTION_MOVETOWARD, curentEnemyCell, getMP());
 		return;
 	}
@@ -1058,6 +1056,7 @@ function lazerProfil(){
 	if(myGetChipEffects(CHIP_HELMET)[CHIPEF_ACTUALCD] == 3){
 		
 		//déplacement
+		doAction3P(ACTION_USE_CHIP, me, CHIP_PROTEIN);
 		doAction3P(ACTION_MOVETOWARD, cellForLazer, myMP);
 		
 		//Actions
@@ -1071,12 +1070,31 @@ function lazerProfil(){
 //##################################################################################################################
 //#                                                      MAIN                                                      #
 //##################################################################################################################
+global stuck = 0;
+global useLazer=true;
+
 initTurn();
 if (turn == 1) {
 	initGame();
 }
 
-lazerProfil();
+
+if(useLazer){
+	lazerProfil();
+}
+if(!useLazer){
+	turnBasic();
+}
+
+if(getTP()>=6&&getMP()>=3){
+	stuck++;
+	
+}
+if(stuck>=2){
+	setWeapon(WEAPON_MAGNUM);
+	useLazer = false;
+}
+
 if(isDead(curentEnemy)){
 	getNewEnemy();
 }
